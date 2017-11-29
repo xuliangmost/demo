@@ -3,7 +3,8 @@ import {connect} from 'react-redux'
 import {IndexAction} from "./actions";
 import './index.less'
 import {Link} from 'react-router-dom'
-import {Button} from 'antd'
+import {Button,Icon} from 'antd'
+import axios from 'axios'
 
 class Index extends Component {
     constructor(props) {
@@ -14,7 +15,23 @@ class Index extends Component {
     }
 
     clickValue(value) {
-        this.props.clickValue(value)
+        this.props.clickValue(value);
+        // axios.request({
+        //     url: '',
+        //     params: {},
+        //     data: {},
+        //     method: 'get||post',
+        //     headers: {},
+        // }).then(res => {
+        //
+        // }).catch(e => {
+
+        // })
+
+    }
+
+    componentDidMount() {
+
     }
 
     render() {
@@ -30,14 +47,14 @@ class Index extends Component {
                     {
                         this.state.list.map((ele, index) => {
                             return (
-                                <li
+                                <Button type='primary'
                                     className='showVal'
                                     style={this.props.showValue === ele ? {
                                         background: '#92FFFF'
                                     } : {background: '-webkit-linear-gradient(left, #ACFAFF, #F6EAFF)'}}
                                     onClick={() => {
                                         this.clickValue(ele)
-                                    }} key={index}>{ele}</li>
+                                    }} key={index}>{ele}</Button>
                             )
                         })
                     }
@@ -49,6 +66,7 @@ class Index extends Component {
                 </div>
                 <Link to='steps'>跳转到页面</Link>
                 <Button type='primary'> haha </Button>
+                <Icon type='right'></Icon>
             </div>
         )
     }
