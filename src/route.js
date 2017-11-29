@@ -1,9 +1,7 @@
 import React, {Component} from 'react'
 import {HashRouter, Route} from 'react-router-dom'
 import Index from './component/index'
-import Indexs from './component/indexs'
-import 'antd-mobile/dist/antd-mobile.css'
-
+import StepSing from './component/product'
 class Page extends Component {
   render () {
     return (
@@ -11,7 +9,7 @@ class Page extends Component {
         <HashRouter>
           <div style={{height: 'calc(100%)'}}>
             <Route exact path='/' component={Index}/>
-            <Route exact path='/indexs' component={Indexs}/>
+            <Route exact path='/steps' component={StepSing}/>
           </div>
         </HashRouter>
       </div>
