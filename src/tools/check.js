@@ -1,25 +1,30 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
-  return /^1[34578][0-9]{9}$/.test(phone);
+  return typeof phone === 'string' && /^1[34578][0-9]{9}$/.test(phone);
 }
 
 function checkEmail (email) {
   let reg = /^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$/;
-  return reg.test(email)
+  return typeof email === 'string' && reg.test(email)
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  const normalized = str === null || str === undefined ? '' : String(str);
+  return normalized.replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
   let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
-  return reg.test(card)
+  return reg.test(trimStr(card))
 }
 
 function getNowFormatDate () {
@@ -40,15 +45,21 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  const env = getReactNativeEnv();
+  if (!env) {
+    console.warn('PhoneCall is only available in react-native env');
+    return false;
+  }
+  const {Linking, Platform} = env;
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
-    return;
+    return false;
   }
 
   if (!isCorrectType('Boolean', prompt)) {
     console.log('the prompt parameter must be a Boolean');
-    return;
+    return false;
   }
 
   let url;
@@ -62,10 +73,10 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  return LaunchURL(Linking, url);
 };
 
-const LaunchURL = function (url) {
+const LaunchURL = function (Linking, url) {
   Linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
@@ -82,6 +93,15 @@ const LaunchURL = function (url) {
         });
     }
   }).catch(err => console.warn('An unexpected error happened', err));
+};
+
+const getReactNativeEnv = function () {
+  try {
+    const {Linking, Platform} = require('react-native');
+    return {Linking, Platform};
+  } catch (e) {
+    return null;
+  }
 };
 
 const isCorrectType = function (expected, actual) {
