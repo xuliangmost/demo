@@ -47,18 +47,11 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
-  const prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
     return;
   }
-
-  if (!isCorrectType('Boolean', prompt)) {
-    console.log('the prompt parameter must be a Boolean');
-    return;
-  }
-
-  let url = prompt ? 'telprompt:' : 'tel:';
+  let url = 'tel:';
 
   url += phoneNumber;
 
