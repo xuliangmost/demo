@@ -1,5 +1,3 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
 }
@@ -10,10 +8,19 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
+  if (typeof str !== 'string') {
+    return '';
+  }
   return str.replace(/(^\s*)|(\s*$)/g, '');
 }
 
@@ -51,37 +58,25 @@ const PhoneCall = function (phoneNumber) {
     return;
   }
 
-  let url;
-
-  if (Platform.OS !== 'android') {
-    url = prompt ? 'telprompt:' : 'tel:';
-  }
-  else {
-    url = 'tel:';
-  }
-
-  url += phoneNumber;
-
+  const url = (prompt ? 'telprompt:' : 'tel:') + phoneNumber;
   LaunchURL(url);
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
+  if (typeof window === 'undefined') {
+    console.warn('window is not available, cannot open url:', url);
+    return;
+  }
+  try {
+    // Browsers generally support tel:, but telprompt: may fail on non-iOS.
+    window.location.href = url;
+  } catch (err) {
+    if (url.includes('telprompt')) {
+      window.location.href = url.replace('telprompt:', 'tel:');
     } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
+      console.warn('openURL error', err)
     }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  }
 };
 
 const isCorrectType = function (expected, actual) {
