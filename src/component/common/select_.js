@@ -1,17 +1,28 @@
 import React, {Component} from 'react'
 
+export function getInitialSelectValue (options) {
+  if (!Array.isArray(options) || options.length === 0) {
+    return '';
+  }
+  const first = options[0];
+  if (!first || typeof first.value === 'undefined' || first.value === null) {
+    return '';
+  }
+  return first.value;
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getInitialSelectValue(props.options)
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
     return (
       <div
         onClick={() => {
