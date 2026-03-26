@@ -1,42 +1,65 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
-  return /^1[34578][0-9]{9}$/.test(phone);
+  if (typeof phone !== 'string') {
+    return false;
+  }
+
+  return /^1[34578][0-9]{9}$/.test(trimStr(phone));
 }
 
 function checkEmail (email) {
+  if (typeof email !== 'string') {
+    return false;
+  }
+
   let reg = /^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$/;
-  return reg.test(email)
+  return reg.test(trimStr(email))
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
+  if (card === null || card === undefined) {
+    return false;
+  }
+
   let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
-  return reg.test(card)
+  return reg.test(trimStr(String(card)))
 }
 
 function getNowFormatDate () {
   let date = new Date();
   let seperator1 = "-";
   let seperator2 = ":";
-  let month = date.getMonth() + 1;
-  let strDate = date.getDate();
-  if (month >= 1 && month <= 9) {
-    month = "0" + month;
-  }
-  if (strDate >= 0 && strDate <= 9) {
-    strDate = "0" + strDate;
-  }
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const strDate = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
   return date.getFullYear() + seperator1 + month + seperator1 + strDate
-    + " " + date.getHours() + seperator2 + date.getMinutes()
-    + seperator2 + date.getSeconds();
+    + " " + hours + seperator2 + minutes + seperator2 + seconds;
 }
 
 const PhoneCall = function (phoneNumber) {
@@ -51,37 +74,23 @@ const PhoneCall = function (phoneNumber) {
     return;
   }
 
-  let url;
-
-  if (Platform.OS !== 'android') {
-    url = prompt ? 'telprompt:' : 'tel:';
-  }
-  else {
-    url = 'tel:';
-  }
-
-  url += phoneNumber;
-
-  LaunchURL(url);
+  const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent);
+  const prefix = !isAndroid && prompt ? 'telprompt:' : 'tel:';
+  const url = prefix + trimStr(phoneNumber);
+  return LaunchURL(url);
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
-    }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  if (!isCorrectType('String', url) || isEmpty(url)) {
+    return Promise.reject(new Error('The url must be a non-empty string'));
+  }
+
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('Current environment does not support URL navigation'));
+  }
+
+  window.location.href = url;
+  return Promise.resolve(true);
 };
 
 const isCorrectType = function (expected, actual) {

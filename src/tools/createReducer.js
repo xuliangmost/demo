@@ -1,6 +1,10 @@
 export default function createReducer(initialState, handlers) {
   return function reducer(state = initialState, action) {
-    if (handlers.hasOwnProperty(action.type)) {
+    if (
+      action &&
+      action.type &&
+      Object.prototype.hasOwnProperty.call(handlers, action.type)
+    ) {
       return handlers[action.type](state, action)
     } else {
       return state
