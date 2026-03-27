@@ -1,20 +1,30 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
-  return /^1[34578][0-9]{9}$/.test(phone);
+  return /^1[3-9][0-9]{9}$/.test(String(phone || ''));
 }
 
 function checkEmail (email) {
+  if (!isCorrectType('String', email)) {
+    return false;
+  }
   let reg = /^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$/;
   return reg.test(email)
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+  if (isCorrectType('String', value)) {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  return String(str === null || str === undefined ? '' : str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -43,17 +53,18 @@ const PhoneCall = function (phoneNumber) {
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
-    return;
+    return false;
   }
 
   if (!isCorrectType('Boolean', prompt)) {
     console.log('the prompt parameter must be a Boolean');
-    return;
+    return false;
   }
 
+  const isAndroid = typeof navigator !== 'undefined'
+    && /android/i.test(navigator.userAgent || '');
   let url;
-
-  if (Platform.OS !== 'android') {
+  if (!isAndroid) {
     url = prompt ? 'telprompt:' : 'tel:';
   }
   else {
@@ -62,26 +73,20 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  return LaunchURL(url);
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
+  try {
+    if (typeof window !== 'undefined') {
+      window.location.href = url;
+      return true;
     }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  } catch (err) {
+    console.warn('openURL error', err);
+  }
+  console.log('Can\'t handle url: ' + url);
+  return false;
 };
 
 const isCorrectType = function (expected, actual) {

@@ -1,17 +1,37 @@
 import React, {Component} from 'react'
 
+export function getInitialSelectValue (options = []) {
+  if (!Array.isArray(options) || options.length === 0) {
+    return ''
+  }
+  return options[0].value
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = Array.isArray(props.options) ? props.options : []
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getInitialSelectValue(options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = Array.isArray(this.props.options) ? this.props.options : []
+      const hasSelectedValue = options.some((option) => option.value === this.state.selectValue)
+      if (!hasSelectedValue) {
+        this.setState({
+          selectValue: getInitialSelectValue(options)
+        })
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options : []
     return (
       <div
         onClick={() => {
@@ -19,7 +39,7 @@ class Select_ extends Component {
         }}
         style={{
           width: 100,
-          height: this.state.show ? height_ * options.length + 50 : height_, overflow: 'hidden',
+          height: this.state.show ? height_ * options.length + height_ : height_, overflow: 'hidden',
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
