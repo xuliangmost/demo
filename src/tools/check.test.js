@@ -6,7 +6,7 @@ jest.mock('react-native', () => ({
   Platform: {
     OS: 'ios',
   },
-}));
+}), {virtual: true});
 
 import {
   checkEmail,
