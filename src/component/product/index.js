@@ -33,11 +33,11 @@ class StepSing extends Component {
         }
     }
     next() {
-        const current = this.state.current + 1;
+        const current = Math.min(this.state.current + 1, steps.length - 1);
         this.setState({ current });
     }
     prev() {
-        const current = this.state.current - 1;
+        const current = Math.max(this.state.current - 1, 0);
         this.setState({ current });
     }
     render() {
