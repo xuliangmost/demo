@@ -3,15 +3,34 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getOptions(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options[0] ? options[0].value : ''
+    }
+  }
+
+  getOptions (options) {
+    return Array.isArray(options) ? options : [];
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options === this.props.options) {
+      return;
+    }
+
+    const options = this.getOptions(this.props.options);
+    const hasCurrent = options.some((option) => option.value === this.state.selectValue);
+    if (!hasCurrent) {
+      this.setState({
+        selectValue: options[0] ? options[0].value : ''
+      });
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getOptions(this.props.options);
     return (
       <div
         onClick={() => {
@@ -19,7 +38,8 @@ class Select_ extends Component {
         }}
         style={{
           width: 100,
-          height: this.state.show ? height_ * options.length + 50 : height_, overflow: 'hidden',
+          height: this.state.show ? height_ * options.length + height_ : height_,
+          overflow: 'hidden',
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
