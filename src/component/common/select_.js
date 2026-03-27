@@ -3,15 +3,33 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const firstOption = props.options && props.options.length > 0 ? props.options[0].value : '';
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: firstOption
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const nextValue = this.props.options && this.props.options.length > 0 ? this.props.options[0].value : '';
+      if (!this.props.options || this.props.options.length === 0) {
+        if (this.state.selectValue !== '') {
+          this.setState({selectValue: ''});
+        }
+        return;
+      }
+      const hasCurrentValue = this.props.options.some(option => option.value === this.state.selectValue);
+      if (!hasCurrentValue) {
+        this.setState({selectValue: nextValue});
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    let {options = []} = this.props;
+    const panelHeight = this.state.show ? height_ * options.length + 50 : height_;
     return (
       <div
         onClick={() => {
@@ -19,7 +37,7 @@ class Select_ extends Component {
         }}
         style={{
           width: 100,
-          height: this.state.show ? height_ * options.length + 50 : height_, overflow: 'hidden',
+          height: panelHeight, overflow: 'hidden',
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>

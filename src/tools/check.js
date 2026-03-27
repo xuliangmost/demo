@@ -1,25 +1,35 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
-  return /^1[34578][0-9]{9}$/.test(phone);
+  return typeof phone === 'string' && /^1[34578][0-9]{9}$/.test(phone);
 }
 
 function checkEmail (email) {
   let reg = /^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$/;
-  return reg.test(email)
+  return typeof email === 'string' && reg.test(email)
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
   let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
-  return reg.test(card)
+  return typeof card === 'string' && reg.test(card)
 }
 
 function getNowFormatDate () {
@@ -51,37 +61,23 @@ const PhoneCall = function (phoneNumber) {
     return;
   }
 
-  let url;
-
-  if (Platform.OS !== 'android') {
-    url = prompt ? 'telprompt:' : 'tel:';
-  }
-  else {
-    url = 'tel:';
-  }
-
+  let url = prompt ? 'telprompt:' : 'tel:';
   url += phoneNumber;
 
-  LaunchURL(url);
+  return LaunchURL(url);
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
-    }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  try {
+    window.location.href = url;
+    return true;
+  } catch (err) {
+    console.warn('openURL error', err);
+    return false;
+  }
 };
 
 const isCorrectType = function (expected, actual) {
