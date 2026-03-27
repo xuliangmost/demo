@@ -3,19 +3,44 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getOptions(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: this.getInitialValue(options)
     }
+  }
+
+  componentDidUpdate (prevProps) {
+    const prevOptions = this.getOptions(prevProps);
+    const options = this.getOptions(this.props);
+    if (prevOptions !== options) {
+      const hasSelectedValue = options.some((item) => item.value === this.state.selectValue);
+      if (!hasSelectedValue) {
+        this.setState({
+          selectValue: this.getInitialValue(options)
+        })
+      }
+    }
+  }
+
+  getOptions (props) {
+    return Array.isArray(props.options) ? props.options : []
+  }
+
+  getInitialValue (options) {
+    return options[0] ? options[0].value : ''
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getOptions(this.props);
+    const showText = this.state.selectValue === '' ? '请选择' : this.state.selectValue;
     return (
       <div
         onClick={() => {
-          this.setState({show: !this.state.show})
+          if (options.length > 0) {
+            this.setState({show: !this.state.show})
+          }
         }}
         style={{
           width: 100,
@@ -23,7 +48,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{showText}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}

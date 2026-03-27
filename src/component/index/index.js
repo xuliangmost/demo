@@ -42,7 +42,7 @@ class Index extends Component {
         width: '100%'
       }}>
         <h1>我是index~~</h1>
-        <h2>点击的数字:{this.props.showValue ? this.props.showValue : '未点击'}</h2>
+        <h2>点击的数字:{this.props.showValue == null ? '未点击' : this.props.showValue}</h2>
         <ul style={{overflow: 'hidden'}}>
           {
             this.state.list.map((ele, index) => {
@@ -65,7 +65,7 @@ class Index extends Component {
           </label>
         </div>
 
-        <Link to='steps'>跳转到页面</Link>
+        <Link to='/steps'>跳转到页面</Link>
 
         <Select
           onChange={(value) => {
