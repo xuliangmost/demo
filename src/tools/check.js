@@ -1,23 +1,47 @@
 import {Linking, Platform} from 'react-native'
 
 function checkPhone (phone) {
+  if (typeof phone !== 'string') {
+    return false;
+  }
   return /^1[34578][0-9]{9}$/.test(phone);
 }
 
 function checkEmail (email) {
+  if (typeof email !== 'string') {
+    return false;
+  }
   let reg = /^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$/;
   return reg.test(email)
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+  return false;
 }
 
 function trimStr (str) {
+  if (str === null || str === undefined) {
+    return '';
+  }
+  if (typeof str !== 'string') {
+    return String(str);
+  }
   return str.replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
+  if (typeof card !== 'string') {
+    return false;
+  }
   let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
   return reg.test(card)
 }
