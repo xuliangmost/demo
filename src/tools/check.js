@@ -1,4 +1,19 @@
-import {Linking, Platform} from 'react-native'
+const Platform = {
+  OS: typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent) ? 'android' : 'web'
+};
+
+const Linking = {
+  canOpenURL () {
+    return Promise.resolve(typeof window !== 'undefined');
+  },
+  openURL (url) {
+    if (typeof window === 'undefined') {
+      return Promise.reject(new Error('window is undefined'));
+    }
+    window.location.href = url;
+    return Promise.resolve();
+  }
+};
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -10,11 +25,20 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
