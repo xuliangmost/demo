@@ -1,20 +1,57 @@
 import React, {Component} from 'react'
 
+function normalizeOptions (options) {
+  if (!Array.isArray(options)) {
+    return [];
+  }
+  return options.filter(item => item && typeof item === 'object' && Object.prototype.hasOwnProperty.call(item, 'value'));
+}
+
+function getFirstValue (options) {
+  return options[0] ? options[0].value : '';
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = normalizeOptions(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getFirstValue(options)
     }
+  }
+
+  static getDerivedStateFromProps (nextProps, prevState) {
+    const options = normalizeOptions(nextProps.options);
+    if (!options.length) {
+      if (prevState.selectValue !== '' || prevState.show) {
+        return {
+          selectValue: '',
+          show: false
+        };
+      }
+      return null;
+    }
+
+    const hasSelected = options.some(item => item && item.value === prevState.selectValue);
+    if (!hasSelected) {
+      return {
+        selectValue: getFirstValue(options)
+      };
+    }
+
+    return null;
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = normalizeOptions(this.props.options);
     return (
       <div
         onClick={() => {
+          if (!options.length) {
+            return;
+          }
           this.setState({show: !this.state.show})
         }}
         style={{
@@ -50,4 +87,9 @@ const styles = {
     textAlign: 'center'
   }
 };
+
+Select_.defaultProps = {
+  options: []
+};
+
 export default Select_
