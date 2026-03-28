@@ -10,6 +10,18 @@ class Select_ extends Component {
     }
   }
 
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = Array.isArray(this.props.options) ? this.props.options : [];
+      const hasCurrent = options.some(item => item.value === this.state.selectValue);
+      if (!hasCurrent) {
+        this.setState({
+          selectValue: options.length > 0 ? options[0].value : ''
+        });
+      }
+    }
+  }
+
   render () {
     const height_ = 50;
     const options = Array.isArray(this.props.options) ? this.props.options : [];
