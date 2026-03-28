@@ -1,17 +1,38 @@
 import React, {Component} from 'react'
 
+export function getInitialSelectValue (options) {
+  if (!Array.isArray(options) || options.length === 0) {
+    return ''
+  }
+  const firstOption = options[0] || {};
+  return firstOption.value === undefined || firstOption.value === null ? '' : firstOption.value
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getInitialSelectValue(props.options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = Array.isArray(this.props.options) ? this.props.options : [];
+      const hasCurrentValue = options.some((item) => item && item.value === this.state.selectValue);
+      if (!hasCurrentValue) {
+        this.setState({
+          selectValue: getInitialSelectValue(options)
+        })
+      }
     }
   }
 
   render () {
     const height_ = 50;
     let {options} = this.props;
+    options = Array.isArray(options) ? options : [];
     return (
       <div
         onClick={() => {
@@ -19,7 +40,7 @@ class Select_ extends Component {
         }}
         style={{
           width: 100,
-          height: this.state.show ? height_ * options.length + 50 : height_, overflow: 'hidden',
+          height: this.state.show ? height_ * (options.length + 1) : height_, overflow: 'hidden',
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
@@ -49,5 +70,8 @@ const styles = {
     lineHeight: '50px',
     textAlign: 'center'
   }
+};
+Select_.defaultProps = {
+  options: []
 };
 export default Select_
