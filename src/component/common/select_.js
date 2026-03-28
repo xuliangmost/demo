@@ -3,15 +3,23 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getOptions(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
     }
+  }
+
+  getOptions (props) {
+    if (!props || !Array.isArray(props.options)) {
+      return [];
+    }
+    return props.options.filter((item) => item && Object.prototype.hasOwnProperty.call(item, 'value'));
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getOptions(this.props);
     return (
       <div
         onClick={() => {
