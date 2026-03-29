@@ -14,7 +14,7 @@ class Select_ extends Component {
     if (!props || !Array.isArray(props.options)) {
       return [];
     }
-    return props.options;
+    return props.options.filter((item) => item && item.value !== undefined && item.value !== null);
   }
 
   componentDidUpdate (prevProps) {
