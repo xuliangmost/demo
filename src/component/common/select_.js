@@ -3,15 +3,37 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getOptions(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
     }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = this.getOptions(this.props);
+      const hasCurrentValue = options.some((item) => item.value === this.state.selectValue);
+      if (!hasCurrentValue) {
+        this.setState({
+          selectValue: options.length > 0 ? options[0].value : '',
+          show: false
+        });
+      }
+    }
+  }
+
+  getOptions (props) {
+    const {options} = props;
+    if (!Array.isArray(options)) {
+      return [];
+    }
+    return options.filter((item) => item && Object.prototype.hasOwnProperty.call(item, 'value'));
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getOptions(this.props);
     return (
       <div
         onClick={() => {
@@ -50,4 +72,10 @@ const styles = {
     textAlign: 'center'
   }
 };
+
+Select_.defaultProps = {
+  options: [],
+  onChange: null
+};
+
 export default Select_
