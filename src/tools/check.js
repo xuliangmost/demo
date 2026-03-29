@@ -1,4 +1,15 @@
-import {Linking, Platform} from 'react-native'
+let Linking = null;
+let Platform = null;
+
+try {
+  // 保持兼容：在 RN 环境可用，在 Web 构建时不会因依赖缺失直接失败
+  const rn = require('react-native');
+  Linking = rn.Linking;
+  Platform = rn.Platform;
+} catch (e) {
+  Linking = null;
+  Platform = null;
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -10,11 +21,17 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  return typeof str === 'string' ? str.replace(/(^\s*)|(\s*$)/g, '') : '';
 }
 
 function cardValidate (card) {
@@ -52,6 +69,11 @@ const PhoneCall = function (phoneNumber) {
   }
 
   let url;
+
+  if (!Linking || !Platform) {
+    console.warn('PhoneCall is only available in react-native environment');
+    return;
+  }
 
   if (Platform.OS !== 'android') {
     url = prompt ? 'telprompt:' : 'tel:';
