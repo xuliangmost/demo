@@ -3,15 +3,29 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = Array.isArray(props.options) ? props.options.filter(item => item && item.value !== undefined) : [];
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = Array.isArray(this.props.options) ? this.props.options.filter(item => item && item.value !== undefined) : [];
+      const hasCurrent = options.some(item => item && item.value === this.state.selectValue);
+      if (!hasCurrent) {
+        this.setState({
+          selectValue: options.length > 0 ? options[0].value : '',
+          show: false
+        });
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options.filter(item => item && item.value !== undefined) : [];
     return (
       <div
         onClick={() => {
@@ -26,7 +40,7 @@ class Select_ extends Component {
         <p style={styles.p1}>{this.state.selectValue}</p>
         {
           options.map((ele, index) => {
-            return <p style={styles.p1} key={index}
+            return <p style={styles.p1} key={ele.value || index}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
