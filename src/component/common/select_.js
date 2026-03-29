@@ -1,20 +1,44 @@
 import React, {Component} from 'react'
 
 class Select_ extends Component {
+  static getDefaultValue (options) {
+    if (!Array.isArray(options) || options.length === 0) {
+      return ''
+    }
+    const first = options[0]
+    return first && first.value !== undefined ? first.value : ''
+  }
+
   constructor (props) {
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: Select_.getDefaultValue(props.options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = Array.isArray(this.props.options) ? this.props.options : []
+      const hasCurrentValue = options.some((item) => item && item.value === this.state.selectValue)
+      if (!hasCurrentValue) {
+        this.setState({
+          show: false,
+          selectValue: Select_.getDefaultValue(options)
+        })
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
     return (
       <div
         onClick={() => {
+          if (options.length === 0) {
+            return
+          }
           this.setState({show: !this.state.show})
         }}
         style={{
@@ -23,7 +47,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{this.state.selectValue || '--'}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
