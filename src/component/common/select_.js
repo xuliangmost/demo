@@ -3,18 +3,42 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getSafeOptions(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
+    }
+  }
+
+  getSafeOptions (props = this.props) {
+    if (!props || !Array.isArray(props.options)) {
+      return [];
+    }
+    return props.options;
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const nextOptions = this.getSafeOptions(this.props);
+      const hasSelected = nextOptions.some((ele) => ele && ele.value === this.state.selectValue);
+      if (!hasSelected) {
+        this.setState({
+          selectValue: nextOptions.length > 0 ? nextOptions[0].value : '',
+          show: false
+        });
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getSafeOptions();
     return (
       <div
         onClick={() => {
+          if (options.length === 0) {
+            return;
+          }
           this.setState({show: !this.state.show})
         }}
         style={{
@@ -23,7 +47,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{this.state.selectValue || '暂无数据'}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
