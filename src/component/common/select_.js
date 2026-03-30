@@ -3,15 +3,20 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = Array.isArray(props.options) ? props.options : [];
+    const firstValue = options.length > 0 && options[0] && options[0].value !== undefined
+      ? options[0].value
+      : '';
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: firstValue
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
+    const computedHeight = this.state.show ? height_ * options.length + height_ : height_;
     return (
       <div
         onClick={() => {
@@ -19,7 +24,7 @@ class Select_ extends Component {
         }}
         style={{
           width: 100,
-          height: this.state.show ? height_ * options.length + 50 : height_, overflow: 'hidden',
+          height: computedHeight, overflow: 'hidden',
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
