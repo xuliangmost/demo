@@ -1,17 +1,47 @@
 import React, {Component} from 'react'
 
+function normalizeOptions (options) {
+  if (!Array.isArray(options)) {
+    return []
+  }
+  return options.filter((item) => item && item.value !== undefined && item.value !== null)
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = normalizeOptions(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options === this.props.options) {
+      return;
+    }
+    const options = normalizeOptions(this.props.options);
+    if (options.length === 0) {
+      if (this.state.selectValue !== '' || this.state.show) {
+        this.setState({
+          selectValue: '',
+          show: false
+        });
+      }
+      return;
+    }
+    const hasCurrentValue = options.some((item) => item.value === this.state.selectValue);
+    if (!hasCurrentValue) {
+      this.setState({
+        selectValue: options[0].value
+      });
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = normalizeOptions(this.props.options);
     return (
       <div
         onClick={() => {

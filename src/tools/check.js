@@ -1,4 +1,4 @@
-import {Linking, Platform} from 'react-native'
+const isReactNativeRuntime = typeof navigator !== 'undefined' && navigator.product === 'ReactNative';
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -10,11 +10,14 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  return trimStr(value) === '';
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -40,6 +43,14 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  if (!isReactNativeRuntime) {
+    console.warn('PhoneCall only supports React Native runtime');
+    return;
+  }
+
+  // Delay module loading so web bundles do not require react-native.
+  // eslint-disable-next-line global-require
+  const {Linking, Platform} = require('react-native');
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
@@ -62,10 +73,10 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  LaunchURL(url, Linking);
 };
 
-const LaunchURL = function (url) {
+const LaunchURL = function (url, Linking) {
   Linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
