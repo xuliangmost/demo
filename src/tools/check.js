@@ -1,4 +1,13 @@
-import {Linking, Platform} from 'react-native'
+let Linking = null;
+let Platform = {OS: 'web'};
+
+try {
+  const reactNative = require('react-native');
+  Linking = reactNative.Linking;
+  Platform = reactNative.Platform || Platform;
+} catch (e) {
+  // Keep web fallback when react-native is unavailable.
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -14,7 +23,10 @@ function isEmpty (value) {
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -66,22 +78,32 @@ const PhoneCall = function (phoneNumber) {
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
-    }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  if (Linking && typeof Linking.canOpenURL === 'function') {
+    Linking.canOpenURL(url).then(supported => {
+      if (!supported) {
+        console.log('Can\'t handle url: ' + url);
+      } else {
+        Linking.openURL(url)
+          .catch(err => {
+            if (url.includes('telprompt')) {
+              // telprompt was cancelled and Linking openURL method sees this as an error
+              // it is not a true error so ignore it to prevent apps crashing
+              // see https://github.com/anarchicknight/react-native-communications/issues/39
+            } else {
+              console.warn('openURL error', err)
+            }
+          });
+      }
+    }).catch(err => console.warn('An unexpected error happened', err));
+    return;
+  }
+
+  if (typeof window !== 'undefined') {
+    window.location.href = url;
+    return;
+  }
+
+  console.warn('Unable to open URL in current runtime:', url);
 };
 
 const isCorrectType = function (expected, actual) {
