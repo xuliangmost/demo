@@ -1,4 +1,22 @@
-import {Linking, Platform} from 'react-native'
+const isBrowser = typeof window !== 'undefined';
+
+const browserLinking = {
+  canOpenURL () {
+    return Promise.resolve(true);
+  },
+  openURL (url) {
+    if (!isBrowser) {
+      return Promise.reject(new Error('window is not available'));
+    }
+    window.location.href = url;
+    return Promise.resolve();
+  }
+};
+
+const Linking = browserLinking;
+const Platform = {
+  OS: 'web'
+};
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
