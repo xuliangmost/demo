@@ -3,15 +3,32 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getOptions(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
+    }
+  }
+
+  getOptions (props = this.props) {
+    return Array.isArray(props.options) ? props.options : [];
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = this.getOptions(this.props);
+      const hasCurrent = options.some((item) => item.value === this.state.selectValue);
+      if (!hasCurrent) {
+        this.setState({
+          selectValue: options.length > 0 ? options[0].value : ''
+        });
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getOptions();
     return (
       <div
         onClick={() => {
@@ -23,7 +40,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{this.state.selectValue || '-'}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
