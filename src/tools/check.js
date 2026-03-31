@@ -1,4 +1,18 @@
-import {Linking, Platform} from 'react-native'
+function getLinkingModule () {
+  try {
+    return require('react-native').Linking;
+  } catch (e) {
+    return null;
+  }
+}
+
+function getPlatformOS () {
+  try {
+    return require('react-native').Platform.OS;
+  } catch (e) {
+    return 'web';
+  }
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -14,6 +28,12 @@ function isEmpty (value) {
 }
 
 function trimStr (str) {
+  if (str === null || str === undefined) {
+    return '';
+  }
+  if (typeof str !== 'string') {
+    return String(str).replace(/(^\s*)|(\s*$)/g, '');
+  }
   return str.replace(/(^\s*)|(\s*$)/g, '');
 }
 
@@ -53,7 +73,7 @@ const PhoneCall = function (phoneNumber) {
 
   let url;
 
-  if (Platform.OS !== 'android') {
+  if (getPlatformOS() !== 'android') {
     url = prompt ? 'telprompt:' : 'tel:';
   }
   else {
@@ -66,6 +86,11 @@ const PhoneCall = function (phoneNumber) {
 };
 
 const LaunchURL = function (url) {
+  const Linking = getLinkingModule();
+  if (!Linking || !Linking.canOpenURL || !Linking.openURL) {
+    console.warn('Linking module is unavailable in current environment');
+    return;
+  }
   Linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
