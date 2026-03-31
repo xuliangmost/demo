@@ -1,4 +1,16 @@
-import {Linking, Platform} from 'react-native'
+let Linking = {
+  canOpenURL: () => Promise.resolve(false),
+  openURL: () => Promise.resolve()
+};
+let Platform = {OS: 'web'};
+
+try {
+  const ReactNative = require('react-native');
+  Linking = ReactNative.Linking || Linking;
+  Platform = ReactNative.Platform || Platform;
+} catch (e) {
+  // Keep helper functions available in non-react-native runtimes.
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);

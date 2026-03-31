@@ -1,15 +1,5 @@
 import {isEmpty, trimStr} from './check'
 
-jest.mock('react-native', () => ({
-  Linking: {
-    canOpenURL: jest.fn(() => Promise.resolve(true)),
-    openURL: jest.fn(() => Promise.resolve())
-  },
-  Platform: {
-    OS: 'web'
-  }
-}));
-
 describe('check helpers', () => {
   test('isEmpty should return true for null and undefined', () => {
     expect(isEmpty(null)).toBe(true);
