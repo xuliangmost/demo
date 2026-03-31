@@ -1,4 +1,22 @@
-import {Linking, Platform} from 'react-native'
+function getRuntimeBridge () {
+  // Keep utils usable in plain web/node contexts without react-native runtime.
+  const bridge = {
+    Linking: null,
+    Platform: {OS: 'web'}
+  };
+
+  if (typeof window !== 'undefined') {
+    bridge.Linking = {
+      canOpenURL: () => Promise.resolve(true),
+      openURL: (url) => {
+        window.location.href = url;
+        return Promise.resolve();
+      }
+    };
+  }
+
+  return bridge;
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -10,7 +28,7 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  return value === null || value === undefined || trimStr(String(value)) === '';
 }
 
 function trimStr (str) {
@@ -40,6 +58,7 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  const {Linking, Platform} = getRuntimeBridge();
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
@@ -62,10 +81,15 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  LaunchURL(url, Linking);
 };
 
-const LaunchURL = function (url) {
+const LaunchURL = function (url, Linking) {
+  if (!Linking) {
+    console.warn('Linking bridge is not available in this runtime.');
+    return;
+  }
+
   Linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
