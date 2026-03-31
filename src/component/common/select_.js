@@ -3,15 +3,36 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getOptions(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
     }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = this.getOptions(this.props);
+      const hasCurrent = options.some((item) => item.value === this.state.selectValue);
+      if (!hasCurrent) {
+        this.setState({
+          selectValue: options.length > 0 ? options[0].value : '',
+          show: false
+        });
+      }
+    }
+  }
+
+  getOptions (props) {
+    if (!Array.isArray(props.options)) {
+      return [];
+    }
+    return props.options.filter((item) => item && item.value !== undefined);
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getOptions(this.props);
     return (
       <div
         onClick={() => {
@@ -23,7 +44,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{this.state.selectValue || '请选择'}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
@@ -42,6 +63,10 @@ class Select_ extends Component {
     )
   }
 }
+
+Select_.defaultProps = {
+  options: []
+};
 
 const styles = {
   p1: {
