@@ -13,8 +13,11 @@ class Select_ extends Component {
   componentDidUpdate (prevProps) {
     const prevOptions = Array.isArray(prevProps.options) ? prevProps.options : [];
     const nextOptions = Array.isArray(this.props.options) ? this.props.options : [];
-    if (prevOptions !== nextOptions && nextOptions.length > 0 && this.state.selectValue === '') {
-      this.setState({selectValue: nextOptions[0].value});
+    if (prevOptions !== nextOptions) {
+      const hasCurrentValue = nextOptions.some(item => item.value === this.state.selectValue);
+      if (!hasCurrentValue) {
+        this.setState({selectValue: nextOptions.length > 0 ? nextOptions[0].value : ''});
+      }
     }
   }
 
