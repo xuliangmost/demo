@@ -33,21 +33,22 @@ class StepSing extends Component {
         }
     }
     next() {
-        const current = this.state.current + 1;
+        const current = Math.min(this.state.current + 1, steps.length - 1);
         this.setState({ current });
     }
     prev() {
-        const current = this.state.current - 1;
+        const current = Math.max(this.state.current - 1, 0);
         this.setState({ current });
     }
     render() {
         const { current } = this.state;
+        const step = steps[current] || steps[0];
         return (
             <div>
                 <Steps current={current}>
                     {steps.map(item => <Step key={item.title} title={item.title} />)}
                 </Steps>
-                <div className="steps-content">{steps[this.state.current].content}</div>
+                <div className="steps-content">{step.content}</div>
                 <div className="steps-action">
                     {
                         this.state.current < steps.length - 1
