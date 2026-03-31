@@ -33,34 +33,36 @@ class StepSing extends Component {
         }
     }
     next() {
-        const current = this.state.current + 1;
-        this.setState({ current });
+        this.setState((prevState) => ({
+            current: Math.min(prevState.current + 1, steps.length - 1)
+        }));
     }
     prev() {
-        const current = this.state.current - 1;
-        this.setState({ current });
+        this.setState((prevState) => ({
+            current: Math.max(prevState.current - 1, 0)
+        }));
     }
     render() {
-        const { current } = this.state;
+        const current = Math.min(Math.max(this.state.current, 0), steps.length - 1);
         return (
             <div>
                 <Steps current={current}>
                     {steps.map(item => <Step key={item.title} title={item.title} />)}
                 </Steps>
-                <div className="steps-content">{steps[this.state.current].content}</div>
+                <div className="steps-content">{steps[current].content}</div>
                 <div className="steps-action">
                     {
-                        this.state.current < steps.length - 1
+                        current < steps.length - 1
                         &&
                         <Button type="primary" onClick={() => this.next()}>Next</Button>
                     }
                     {
-                        this.state.current === steps.length - 1
+                        current === steps.length - 1
                         &&
                         <Button type="primary" onClick={() => message.success('Processing complete!')}>Done</Button>
                     }
                     {
-                        this.state.current > 0
+                        current > 0
                         &&
                         <Button style={{ marginLeft: 8 }} onClick={() => this.prev()}>
                             Previous
