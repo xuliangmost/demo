@@ -1,4 +1,13 @@
-import {Linking, Platform} from 'react-native'
+let Linking;
+let Platform = {OS: 'web'};
+
+try {
+  const reactNative = require('react-native');
+  Linking = reactNative.Linking;
+  Platform = reactNative.Platform || Platform;
+} catch (e) {
+  // Keep web compatibility when react-native is unavailable.
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -10,11 +19,20 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return trimStr(value) === '';
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -52,6 +70,14 @@ const PhoneCall = function (phoneNumber) {
   }
 
   let url;
+  if (!Linking) {
+    if (typeof window !== 'undefined') {
+      window.location.href = `tel:${phoneNumber}`;
+    } else {
+      console.log('PhoneCall is unavailable in this environment.');
+    }
+    return;
+  }
 
   if (Platform.OS !== 'android') {
     url = prompt ? 'telprompt:' : 'tel:';
