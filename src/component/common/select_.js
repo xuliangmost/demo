@@ -1,17 +1,36 @@
 import React, {Component} from 'react'
 
+function getInitialSelectValue(options) {
+  return options && options.length > 0 ? options[0].value : null;
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getInitialSelectValue(props.options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    const prevOptions = Array.isArray(prevProps.options) ? prevProps.options : [];
+    const nextOptions = Array.isArray(this.props.options) ? this.props.options : [];
+    if (
+      prevOptions.length === 0 &&
+      nextOptions.length > 0 &&
+      this.state.selectValue === null
+    ) {
+      this.setState({
+        selectValue: nextOptions[0].value
+      });
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
+    const selectValue = this.state.selectValue === null ? '请选择' : this.state.selectValue;
     return (
       <div
         onClick={() => {
@@ -23,7 +42,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{selectValue}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
@@ -50,4 +69,9 @@ const styles = {
     textAlign: 'center'
   }
 };
+
+Select_.defaultProps = {
+  options: []
+};
+
 export default Select_

@@ -24,7 +24,9 @@
 	<script>
     if ('addEventListener' in document) {
       document.addEventListener('DOMContentLoaded', function () {
-        FastClick.attach(document.body);
+        if (typeof FastClick !== 'undefined') {
+          FastClick.attach(document.body);
+        }
       }, false);
     }
     if (!window.Promise) {
