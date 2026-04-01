@@ -29,8 +29,11 @@ describe('tools/check', () => {
 
   test('PhoneCall does not crash in non-browser environment', () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const originalWindow = global.window
+    global.window = undefined
     PhoneCall('13800138000')
     expect(warnSpy).toHaveBeenCalled()
+    global.window = originalWindow
     warnSpy.mockRestore()
   })
 })
