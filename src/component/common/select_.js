@@ -3,19 +3,34 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = Array.isArray(props.options) ? props.options : [];
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = Array.isArray(this.props.options) ? this.props.options : [];
+      const hasSelected = options.some((item) => item.value === this.state.selectValue);
+      if (!hasSelected) {
+        this.setState({
+          selectValue: options.length > 0 ? options[0].value : ''
+        });
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
     return (
       <div
         onClick={() => {
-          this.setState({show: !this.state.show})
+          if (options.length > 0) {
+            this.setState({show: !this.state.show})
+          }
         }}
         style={{
           width: 100,
@@ -23,7 +38,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{this.state.selectValue || '暂无选项'}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
