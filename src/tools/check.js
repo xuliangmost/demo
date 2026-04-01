@@ -1,4 +1,15 @@
-import {Linking, Platform} from 'react-native'
+let Linking;
+let Platform;
+
+try {
+  const ReactNative = require('react-native');
+  Linking = ReactNative.Linking;
+  Platform = ReactNative.Platform;
+} catch (e) {
+  // In web builds there is no react-native runtime.
+  Linking = null;
+  Platform = null;
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -14,7 +25,10 @@ function isEmpty (value) {
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -40,6 +54,10 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  if (!Linking || !Platform) {
+    console.warn('PhoneCall is only supported in react-native runtime');
+    return;
+  }
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
