@@ -1,5 +1,3 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
 }
@@ -10,11 +8,20 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -53,11 +60,10 @@ const PhoneCall = function (phoneNumber) {
 
   let url;
 
-  if (Platform.OS !== 'android') {
-    url = prompt ? 'telprompt:' : 'tel:';
-  }
-  else {
+  if (typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)) {
     url = 'tel:';
+  } else {
+    url = prompt ? 'telprompt:' : 'tel:';
   }
 
   url += phoneNumber;
@@ -66,22 +72,33 @@ const PhoneCall = function (phoneNumber) {
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
-    }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  const linking = typeof window !== 'undefined' ? window.Linking : null;
+  if (linking && typeof linking.canOpenURL === 'function' && typeof linking.openURL === 'function') {
+    linking.canOpenURL(url).then(supported => {
+      if (!supported) {
+        console.log('Can\'t handle url: ' + url);
+      } else {
+        linking.openURL(url)
+          .catch(err => {
+            if (url.includes('telprompt')) {
+              // telprompt was cancelled and Linking openURL method sees this as an error
+              // it is not a true error so ignore it to prevent apps crashing
+              // see https://github.com/anarchicknight/react-native-communications/issues/39
+            } else {
+              console.warn('openURL error', err)
+            }
+          });
+      }
+    }).catch(err => console.warn('An unexpected error happened', err));
+    return;
+  }
+
+  if (typeof window !== 'undefined') {
+    window.location.href = url.replace('telprompt:', 'tel:');
+    return;
+  }
+
+  console.warn('PhoneCall is not supported in current environment');
 };
 
 const isCorrectType = function (expected, actual) {
