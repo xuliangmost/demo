@@ -1,17 +1,38 @@
 import React, {Component} from 'react'
 
 class Select_ extends Component {
+  static getSafeOptions (props) {
+    return Array.isArray(props.options) ? props.options : []
+  }
+
+  static getInitialValue (props) {
+    const options = Select_.getSafeOptions(props)
+    return options.length > 0 ? options[0].value : ''
+  }
+
   constructor (props) {
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: Select_.getInitialValue(props)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = Select_.getSafeOptions(this.props)
+      const hasCurrentValue = options.some((item) => item.value === this.state.selectValue)
+      if (!hasCurrentValue) {
+        this.setState({
+          selectValue: options.length > 0 ? options[0].value : ''
+        })
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Select_.getSafeOptions(this.props)
     return (
       <div
         onClick={() => {
@@ -19,7 +40,7 @@ class Select_ extends Component {
         }}
         style={{
           width: 100,
-          height: this.state.show ? height_ * options.length + 50 : height_, overflow: 'hidden',
+          height: this.state.show ? height_ * (options.length + 1) : height_, overflow: 'hidden',
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
