@@ -27,13 +27,10 @@ describe('tools/check', () => {
     expect(cardValidate('11010519491231002X')).toBe(true)
   })
 
-  test('PhoneCall does not crash in non-browser environment', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
-    const originalWindow = global.window
-    global.window = undefined
-    PhoneCall('13800138000')
-    expect(warnSpy).toHaveBeenCalled()
-    global.window = originalWindow
-    warnSpy.mockRestore()
+  test('PhoneCall validates argument type safely', () => {
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
+    expect(() => PhoneCall(13800138000)).not.toThrow()
+    expect(logSpy).toHaveBeenCalledWith('the phone number must be provided as a String value')
+    logSpy.mockRestore()
   })
 })
