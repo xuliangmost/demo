@@ -10,11 +10,20 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -39,8 +48,7 @@ function getNowFormatDate () {
     + seperator2 + date.getSeconds();
 }
 
-const PhoneCall = function (phoneNumber) {
-  let prompt = true;
+const PhoneCall = function (phoneNumber, prompt = true) {
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
     return;
