@@ -51,7 +51,7 @@ class Index extends Component {
                         className='showVal'
                         style={this.props.showValue === ele ? {
                           background: '#92FFFF'
-                        } : {background: '-webkit-linear-gradient(left, #ACFAFF, #F6EAFF)'}}
+                        } : {background: 'linear-gradient(to right, #ACFAFF, #F6EAFF)'}}
                         onClick={() => {
                           this.clickValue(ele);
                         }} key={index}>{ele}</Button>
@@ -65,7 +65,7 @@ class Index extends Component {
           </label>
         </div>
 
-        <Link to='steps'>跳转到页面</Link>
+        <Link to='/steps'>跳转到页面</Link>
 
         <Select
           onChange={(value) => {
