@@ -84,7 +84,7 @@ class Index extends Component {
 
 function mapState (state) {
   return {
-    showValue: state.showValue
+    showValue: state.indexReducer && state.indexReducer.showValue
   }
 }
 
