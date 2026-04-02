@@ -1,5 +1,3 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
 }
@@ -10,11 +8,17 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true
+  }
+  return trimStr(value) === '';
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return ''
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -40,6 +44,12 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  const reactNative = getReactNativeBridge()
+  if (!reactNative) {
+    console.warn('react-native bridge is unavailable');
+    return;
+  }
+
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
@@ -53,7 +63,7 @@ const PhoneCall = function (phoneNumber) {
 
   let url;
 
-  if (Platform.OS !== 'android') {
+  if (reactNative.Platform.OS !== 'android') {
     url = prompt ? 'telprompt:' : 'tel:';
   }
   else {
@@ -62,15 +72,15 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  LaunchURL(reactNative.Linking, url);
 };
 
-const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
+const LaunchURL = function (linking, url) {
+  linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
     } else {
-      Linking.openURL(url)
+      linking.openURL(url)
         .catch(err => {
           if (url.includes('telprompt')) {
             // telprompt was cancelled and Linking openURL method sees this as an error
@@ -87,6 +97,16 @@ const LaunchURL = function (url) {
 const isCorrectType = function (expected, actual) {
   return Object.prototype.toString.call(actual).slice(8, -1) === expected;
 };
+
+function getReactNativeBridge () {
+  try {
+    // eslint-disable-next-line global-require
+    const {Linking, Platform} = require('react-native')
+    return {Linking, Platform}
+  } catch (e) {
+    return null
+  }
+}
 
 export {
   checkEmail,

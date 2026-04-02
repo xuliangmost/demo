@@ -1,17 +1,36 @@
 import React, {Component} from 'react'
 
+function normalizeOptions (options) {
+  return Array.isArray(options) ? options : []
+}
+
+function getInitialSelectValue (options) {
+  const safeOptions = normalizeOptions(options)
+  return safeOptions.length > 0 && safeOptions[0] && safeOptions[0].value !== undefined
+    ? safeOptions[0].value
+    : ''
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getInitialSelectValue(props.options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options && this.state.selectValue === '') {
+      this.setState({
+        selectValue: getInitialSelectValue(this.props.options)
+      })
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = normalizeOptions(this.props.options);
     return (
       <div
         onClick={() => {
@@ -50,4 +69,9 @@ const styles = {
     textAlign: 'center'
   }
 };
+
+export {
+  normalizeOptions,
+  getInitialSelectValue
+}
 export default Select_
