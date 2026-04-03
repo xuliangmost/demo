@@ -42,12 +42,13 @@ class StepSing extends Component {
     }
     render() {
         const { current } = this.state;
+        const currentStep = steps[current] || steps[steps.length - 1];
         return (
             <div>
                 <Steps current={current}>
                     {steps.map(item => <Step key={item.title} title={item.title} />)}
                 </Steps>
-                <div className="steps-content">{steps[this.state.current].content}</div>
+                <div className="steps-content">{currentStep.content}</div>
                 <div className="steps-action">
                     {
                         this.state.current < steps.length - 1
