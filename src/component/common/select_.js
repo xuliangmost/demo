@@ -3,18 +3,46 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = Array.isArray(props.options) ? props.options : [];
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options === this.props.options) {
+      return;
+    }
+
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
+    if (options.length === 0) {
+      if (this.state.selectValue !== '' || this.state.show) {
+        this.setState({
+          selectValue: '',
+          show: false
+        });
+      }
+      return;
+    }
+
+    const hasCurrentValue = options.some((option) => option && option.value === this.state.selectValue);
+    if (!hasCurrentValue) {
+      this.setState({selectValue: options[0].value});
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = (Array.isArray(this.props.options) ? this.props.options : [])
+      .filter((option) => option && option.value !== undefined);
+    const selectedValue = this.state.selectValue || (options[0] ? options[0].value : '请选择');
     return (
       <div
         onClick={() => {
+          if (options.length === 0) {
+            return;
+          }
           this.setState({show: !this.state.show})
         }}
         style={{
@@ -23,7 +51,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{selectedValue}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
@@ -42,6 +70,11 @@ class Select_ extends Component {
     )
   }
 }
+
+Select_.defaultProps = {
+  options: [],
+  onChange: null
+};
 
 const styles = {
   p1: {
