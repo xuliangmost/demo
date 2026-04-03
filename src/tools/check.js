@@ -10,11 +10,20 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+
+  // Non-string values should be compared directly instead of calling replace.
+  if (typeof value !== 'string') {
+    return false;
+  }
+
+  return trimStr(value) === '';
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
