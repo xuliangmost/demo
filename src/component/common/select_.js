@@ -3,15 +3,38 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = Array.isArray(props.options) ? props.options : [];
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
     }
+  }
+
+  componentDidUpdate (prevProps) {
+    const prevValues = this.getOptionValues(prevProps.options);
+    const nextValues = this.getOptionValues(this.props.options);
+    const optionsChanged = prevValues.length !== nextValues.length || prevValues.some((value, idx) => {
+      return value !== nextValues[idx];
+    });
+    if (optionsChanged && nextValues.indexOf(this.state.selectValue) === -1) {
+      const nextValue = nextValues.length > 0 ? nextValues[0] : '';
+      if (this.state.selectValue !== nextValue || this.state.show) {
+        this.setState({
+          selectValue: nextValue,
+          show: false
+        });
+      }
+    }
+  }
+
+  getOptionValues (options) {
+    const safeOptions = Array.isArray(options) ? options : [];
+    return safeOptions.map((option) => option && option.value).filter((value) => value !== undefined);
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    let options = Array.isArray(this.props.options) ? this.props.options : [];
     return (
       <div
         onClick={() => {
