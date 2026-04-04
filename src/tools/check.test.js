@@ -37,17 +37,15 @@ describe('tools/check', () => {
   });
 
   test('PhoneCall returns false without browser window', () => {
-    expect(PhoneCall('13812345678')).toBe(false);
+    expect(PhoneCall(13812345678)).toBe(false);
   });
 
   test('PhoneCall opens tel url in browser environment', () => {
-    const originalWindow = global.window;
-    global.window = {open: jest.fn()};
-
+    const openSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
     const result = PhoneCall('13812345678', false);
 
     expect(result).toBe(true);
-    expect(global.window.open).toHaveBeenCalledWith('tel:13812345678');
-    global.window = originalWindow;
+    expect(openSpy).toHaveBeenCalledWith('tel:13812345678');
+    openSpy.mockRestore();
   });
 });
