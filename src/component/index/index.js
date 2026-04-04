@@ -42,10 +42,10 @@ class Index extends Component {
         width: '100%'
       }}>
         <h1>我是index~~</h1>
-        <h2>点击的数字:{this.props.showValue ? this.props.showValue : '未点击'}</h2>
+        <h2>点击的数字:{this.props.showValue === null || this.props.showValue === undefined ? '未点击' : this.props.showValue}</h2>
         <ul style={{overflow: 'hidden'}}>
           {
-            this.state.list.map((ele, index) => {
+            this.state.list.map((ele) => {
               return (
                 <Button type='primary'
                         className='showVal'
@@ -54,7 +54,7 @@ class Index extends Component {
                         } : {background: '-webkit-linear-gradient(left, #ACFAFF, #F6EAFF)'}}
                         onClick={() => {
                           this.clickValue(ele);
-                        }} key={index}>{ele}</Button>
+                        }} key={ele}>{ele}</Button>
               )
             })
           }
