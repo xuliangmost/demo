@@ -1,9 +1,16 @@
 import React, {Component} from 'react'
 
+function normalizeOptions (options) {
+  if (!Array.isArray(options)) {
+    return [];
+  }
+  return options.filter(item => item && Object.prototype.hasOwnProperty.call(item, 'value'));
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
-    const options = Array.isArray(props.options) ? props.options : [];
+    const options = normalizeOptions(props.options);
     this.state = {
       show: false,
       selectValue: options.length > 0 && options[0] ? options[0].value : ''
@@ -12,7 +19,7 @@ class Select_ extends Component {
 
   componentDidUpdate (prevProps) {
     if (prevProps.options !== this.props.options) {
-      const options = Array.isArray(this.props.options) ? this.props.options : [];
+      const options = normalizeOptions(this.props.options);
       const hasCurrentValue = options.some(item => item && item.value === this.state.selectValue);
       if (!hasCurrentValue) {
         this.setState({
@@ -24,7 +31,7 @@ class Select_ extends Component {
 
   render () {
     const height_ = 50;
-    const options = Array.isArray(this.props.options) ? this.props.options : [];
+    const options = normalizeOptions(this.props.options);
     return (
       <div
         onClick={() => {
@@ -48,7 +55,7 @@ class Select_ extends Component {
                           show: false
                         });
                         this.props.onChange && this.props.onChange(ele.value)
-                      }}>{ele && ele.value}</p>
+                      }}>{ele.value}</p>
           })
         }
       </div>
