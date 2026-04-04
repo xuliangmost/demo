@@ -22,15 +22,18 @@ class StepSing extends Component {
         };
     }
     rootSubmenuKeys = ['sub1', 'sub2', 'sub4'];
-    onOpenChange = (openKeys) => {
-        const latestOpenKey = openKeys.find(key => this.state.openKeys.indexOf(key) === -1);
-        if (this.rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
-            this.setState({ openKeys });
-        } else {
-            this.setState({
-                openKeys: latestOpenKey ? [latestOpenKey] : [],
-            });
+    onOpenChange = (openKeys = []) => {
+        const nextOpenKeys = Array.isArray(openKeys) ? openKeys : [];
+        const latestOpenKey = nextOpenKeys.find((key) => this.state.openKeys.indexOf(key) === -1);
+
+        if (!latestOpenKey || this.rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
+            this.setState({ openKeys: nextOpenKeys });
+            return;
         }
+
+        this.setState({
+            openKeys: [latestOpenKey],
+        });
     }
     next() {
         const current = this.state.current + 1;

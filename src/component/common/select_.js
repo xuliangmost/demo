@@ -1,17 +1,42 @@
 import React, {Component} from 'react'
 
 class Select_ extends Component {
+  static defaultOptions (options) {
+    return Array.isArray(options) ? options : [];
+  }
+
+  static getDefaultValue (options) {
+    if (!options.length) {
+      return '';
+    }
+    return options[0] && options[0].value !== undefined ? options[0].value : '';
+  }
+
   constructor (props) {
     super(props);
+    const options = Select_.defaultOptions(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: Select_.getDefaultValue(options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = Select_.defaultOptions(this.props.options);
+      const hasCurrentValue = options.some((option) => option.value === this.state.selectValue);
+      if (!hasCurrentValue) {
+        this.setState({
+          selectValue: Select_.getDefaultValue(options),
+          show: false
+        });
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Select_.defaultOptions(this.props.options);
     return (
       <div
         onClick={() => {
