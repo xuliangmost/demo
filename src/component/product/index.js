@@ -24,6 +24,10 @@ class StepSing extends Component {
     rootSubmenuKeys = ['sub1', 'sub2', 'sub4'];
     onOpenChange = (openKeys) => {
         const latestOpenKey = openKeys.find(key => this.state.openKeys.indexOf(key) === -1);
+        if (latestOpenKey === undefined) {
+            this.setState({ openKeys });
+            return;
+        }
         if (this.rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
             this.setState({ openKeys });
         } else {
