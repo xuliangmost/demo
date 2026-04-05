@@ -3,15 +3,23 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getSafeOptions(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
     }
+  }
+
+  getSafeOptions (options) {
+    if (!Array.isArray(options)) {
+      return [];
+    }
+    return options.filter(option => option && option.value !== undefined && option.value !== null);
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getSafeOptions(this.props.options);
     return (
       <div
         onClick={() => {
@@ -23,7 +31,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{this.state.selectValue || '请选择'}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
