@@ -1,5 +1,3 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
 }
@@ -10,11 +8,20 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -40,6 +47,18 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  let Linking;
+  let Platform;
+  try {
+    // Keep react-native as an optional runtime dependency.
+    const reactNative = require('react-native');
+    Linking = reactNative.Linking;
+    Platform = reactNative.Platform;
+  } catch (e) {
+    console.warn('PhoneCall is only available in react-native runtime');
+    return;
+  }
+
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
@@ -62,15 +81,15 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  LaunchURL(url, Linking);
 };
 
-const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
+const LaunchURL = function (url, linking) {
+  linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
     } else {
-      Linking.openURL(url)
+      linking.openURL(url)
         .catch(err => {
           if (url.includes('telprompt')) {
             // telprompt was cancelled and Linking openURL method sees this as an error
