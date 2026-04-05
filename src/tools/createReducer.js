@@ -1,9 +1,9 @@
 export default function createReducer(initialState, handlers) {
-  return function reducer(state = initialState, action) {
-    if (handlers.hasOwnProperty(action.type)) {
+  return function reducer(state = initialState, action = {}) {
+    const actionType = action.type;
+    if (Object.prototype.hasOwnProperty.call(handlers, actionType)) {
       return handlers[action.type](state, action)
-    } else {
-      return state
     }
-  }
+    return state
+  };
 }

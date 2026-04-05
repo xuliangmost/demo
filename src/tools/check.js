@@ -1,5 +1,3 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
 }
@@ -10,7 +8,13 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
@@ -51,12 +55,13 @@ const PhoneCall = function (phoneNumber) {
     return;
   }
 
-  let url;
-
-  if (Platform.OS !== 'android') {
-    url = prompt ? 'telprompt:' : 'tel:';
+  if (typeof window === 'undefined' || !window.location) {
+    console.warn('PhoneCall is only available in browser environments');
+    return;
   }
-  else {
+
+  let url = prompt ? 'telprompt:' : 'tel:';
+  if (/android/i.test(window.navigator.userAgent)) {
     url = 'tel:';
   }
 
@@ -66,22 +71,18 @@ const PhoneCall = function (phoneNumber) {
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
+  if (typeof window === 'undefined' || !window.location) {
+    console.warn('LaunchURL is only available in browser environments');
+    return;
+  }
+
+  try {
+    window.location.href = url;
+  } catch (err) {
+    if (!url.includes('telprompt')) {
+      console.warn('openURL error', err)
     }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  }
 };
 
 const isCorrectType = function (expected, actual) {
