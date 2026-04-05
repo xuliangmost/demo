@@ -3,18 +3,45 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getOptions(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
+    }
+  }
+
+  getOptions (props = this.props) {
+    return Array.isArray(props.options) ? props.options : []
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options === this.props.options) {
+      return
+    }
+    const options = this.getOptions();
+    if (options.length === 0) {
+      if (this.state.selectValue !== '' || this.state.show) {
+        this.setState({selectValue: '', show: false})
+      }
+      return
+    }
+    const hasCurrentValue = options.some((item) => item.value === this.state.selectValue);
+    if (!hasCurrentValue) {
+      this.setState({selectValue: options[0].value, show: false})
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getOptions();
+    const hasOptions = options.length > 0;
+    const displayValue = this.state.selectValue || '请选择';
     return (
       <div
         onClick={() => {
+          if (!hasOptions) {
+            return
+          }
           this.setState({show: !this.state.show})
         }}
         style={{
@@ -23,9 +50,9 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{displayValue}</p>
         {
-          options.map((ele, index) => {
+          hasOptions ? options.map((ele, index) => {
             return <p style={styles.p1} key={index}
                       onClick={(e) => {
                         e.preventDefault();
@@ -36,7 +63,7 @@ class Select_ extends Component {
                         });
                         this.props.onChange && this.props.onChange(ele.value)
                       }}>{ele.value}</p>
-          })
+          }) : null
         }
       </div>
     )
