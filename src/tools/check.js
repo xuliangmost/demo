@@ -1,5 +1,3 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
 }
@@ -10,11 +8,23 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+  return false;
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -40,6 +50,13 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  const nativeModules = getReactNativeModules();
+  if (!nativeModules) {
+    console.warn('PhoneCall is only available in React Native runtime');
+    return;
+  }
+
+  const {Linking, Platform} = nativeModules;
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
@@ -62,10 +79,10 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  LaunchURL(url, Linking);
 };
 
-const LaunchURL = function (url) {
+const LaunchURL = function (url, Linking) {
   Linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
@@ -87,6 +104,14 @@ const LaunchURL = function (url) {
 const isCorrectType = function (expected, actual) {
   return Object.prototype.toString.call(actual).slice(8, -1) === expected;
 };
+
+function getReactNativeModules () {
+  try {
+    return require('react-native');
+  } catch (error) {
+    return null;
+  }
+}
 
 export {
   checkEmail,

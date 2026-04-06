@@ -1,17 +1,36 @@
 import React, {Component} from 'react'
 
+function normalizeOptions (options) {
+  if (!Array.isArray(options)) {
+    return [];
+  }
+  return options.filter(option => option && option.value !== undefined);
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = normalizeOptions(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
+    }
+  }
+
+  componentWillReceiveProps (nextProps) {
+    const options = normalizeOptions(nextProps.options);
+    if (options.length === 0 && this.state.selectValue !== '') {
+      this.setState({selectValue: ''});
+      return;
+    }
+    if (options.length > 0 && options.every(option => option.value !== this.state.selectValue)) {
+      this.setState({selectValue: options[0].value});
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = normalizeOptions(this.props.options);
     return (
       <div
         onClick={() => {
@@ -49,5 +68,9 @@ const styles = {
     lineHeight: '50px',
     textAlign: 'center'
   }
+};
+
+Select_.defaultProps = {
+  options: []
 };
 export default Select_
