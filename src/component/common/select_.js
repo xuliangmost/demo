@@ -3,15 +3,16 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const firstOption = props.options && props.options.length > 0 ? props.options[0] : null;
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: firstOption ? firstOption.value : ''
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.props.options || [];
     return (
       <div
         onClick={() => {
