@@ -3,15 +3,42 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getOptions(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: this.getFirstOptionValue(options)
     }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = this.getOptions(this.props.options);
+      const hasSelected = options.some((option) => option.value === this.state.selectValue);
+      if (!hasSelected) {
+        this.setState({
+          selectValue: this.getFirstOptionValue(options)
+        });
+      }
+    }
+  }
+
+  getOptions (options) {
+    if (!Array.isArray(options)) {
+      return [];
+    }
+
+    return options
+      .filter((option) => option && option.value !== undefined && option.value !== null)
+      .map((option) => ({value: option.value}));
+  }
+
+  getFirstOptionValue (options) {
+    return options.length > 0 ? options[0].value : '';
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getOptions(this.props.options);
     return (
       <div
         onClick={() => {
