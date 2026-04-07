@@ -38,12 +38,12 @@ describe('tools/check', () => {
     expect(cardValidate('abc')).toBe(false);
   });
 
-  test('PhoneCall exits safely in non-browser environment', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+  test('PhoneCall exits safely for invalid input', () => {
+    const logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
-    PhoneCall('13800138000');
+    PhoneCall(13800138000);
 
-    expect(warnSpy).toHaveBeenCalledWith('PhoneCall is only supported in browser environment');
-    warnSpy.mockRestore();
+    expect(logSpy).toHaveBeenCalledWith('the phone number must be provided as a String value');
+    logSpy.mockRestore();
   });
 });
