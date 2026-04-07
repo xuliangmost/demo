@@ -3,15 +3,17 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = Array.isArray(props.options) ? props.options : [];
+    const firstOption = options[0] || {};
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: firstOption.value || ''
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
     return (
       <div
         onClick={() => {
@@ -23,9 +25,9 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{this.state.selectValue || '请选择'}</p>
         {
-          options.map((ele, index) => {
+          options.filter(ele => ele && ele.value !== undefined).map((ele, index) => {
             return <p style={styles.p1} key={index}
                       onClick={(e) => {
                         e.preventDefault();
@@ -49,5 +51,9 @@ const styles = {
     lineHeight: '50px',
     textAlign: 'center'
   }
+};
+
+Select_.defaultProps = {
+  options: []
 };
 export default Select_
