@@ -3,15 +3,31 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = Array.isArray(props.options) ? props.options : [];
+    const firstValue = options[0] && options[0].value !== undefined ? options[0].value : '';
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: firstValue
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options === this.props.options) {
+      return;
+    }
+
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
+    const hasCurrentValue = options.some((option) => option && option.value === this.state.selectValue);
+    if (!hasCurrentValue) {
+      this.setState({
+        selectValue: options[0] && options[0].value !== undefined ? options[0].value : ''
+      });
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
     return (
       <div
         onClick={() => {
@@ -26,16 +42,17 @@ class Select_ extends Component {
         <p style={styles.p1}>{this.state.selectValue}</p>
         {
           options.map((ele, index) => {
+            const optionValue = ele && ele.value !== undefined ? ele.value : '';
             return <p style={styles.p1} key={index}
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         this.setState({
-                          selectValue: ele.value,
+                          selectValue: optionValue,
                           show: false
                         });
-                        this.props.onChange && this.props.onChange(ele.value)
-                      }}>{ele.value}</p>
+                        this.props.onChange && this.props.onChange(optionValue)
+                      }}>{optionValue}</p>
           })
         }
       </div>
