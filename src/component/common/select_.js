@@ -1,21 +1,48 @@
 import React, {Component} from 'react'
 
+function getOptions (options) {
+  return Array.isArray(options) ? options : []
+}
+
+function getDefaultSelectValue (options) {
+  const safeOptions = getOptions(options)
+  if (!safeOptions.length) {
+    return ''
+  }
+  return safeOptions[0].value
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getDefaultSelectValue(props.options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = getOptions(this.props.options)
+      const hasCurrentValue = options.some(ele => ele.value === this.state.selectValue)
+      if (!hasCurrentValue) {
+        this.setState({
+          selectValue: getDefaultSelectValue(this.props.options),
+          show: false
+        })
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = getOptions(this.props.options)
     return (
       <div
         onClick={() => {
-          this.setState({show: !this.state.show})
+          if (options.length) {
+            this.setState({show: !this.state.show})
+          }
         }}
         style={{
           width: 100,
