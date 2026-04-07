@@ -3,9 +3,10 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const firstOption = (props.options && props.options[0]) || {};
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: firstOption.value || ''
     }
   }
 
@@ -42,6 +43,10 @@ class Select_ extends Component {
     )
   }
 }
+
+Select_.defaultProps = {
+  options: []
+};
 
 const styles = {
   p1: {
