@@ -1,17 +1,49 @@
 import React, {Component} from 'react'
 
+export function getInitialSelectValue (options) {
+  if (!Array.isArray(options) || options.length === 0) {
+    return ''
+  }
+
+  for (let i = 0; i < options.length; i++) {
+    const option = options[i]
+    if (option && typeof option.value !== 'undefined') {
+      return option.value
+    }
+  }
+
+  return ''
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getInitialSelectValue(props.options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = Array.isArray(this.props.options)
+        ? this.props.options.filter((option) => option && typeof option.value !== 'undefined')
+        : []
+      const hasSelectedValue = options.some((option) => option.value === this.state.selectValue)
+
+      if (!hasSelectedValue) {
+        this.setState({
+          selectValue: getInitialSelectValue(this.props.options)
+        })
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options)
+      ? this.props.options.filter((option) => option && typeof option.value !== 'undefined')
+      : [];
     return (
       <div
         onClick={() => {
@@ -19,7 +51,7 @@ class Select_ extends Component {
         }}
         style={{
           width: 100,
-          height: this.state.show ? height_ * options.length + 50 : height_, overflow: 'hidden',
+          height: this.state.show ? height_ * (options.length + 1) : height_, overflow: 'hidden',
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>

@@ -49,6 +49,9 @@ function registerValidSW(swUrl) {
     .then(registration => {
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
+        if (!installingWorker) {
+          return;
+        }
         installingWorker.onstatechange = () => {
           if (installingWorker.state === 'installed') {
             if (navigator.serviceWorker.controller) {
@@ -79,7 +82,7 @@ function checkValidServiceWorker(swUrl) {
       // Ensure service worker exists, and that we really are getting a JS file.
       if (
         response.status === 404 ||
-        response.headers.get('content-type').indexOf('javascript') === -1
+        !isJavaScriptResponse(response)
       ) {
         // No service worker found. Probably a different app. Reload the page.
         navigator.serviceWorker.ready.then(registration => {
@@ -97,6 +100,19 @@ function checkValidServiceWorker(swUrl) {
         'No internet connection found. App is running in offline mode.'
       );
     });
+}
+
+export function isJavaScriptResponse (response) {
+  if (!response || !response.headers || typeof response.headers.get !== 'function') {
+    return false
+  }
+
+  const contentType = response.headers.get('content-type')
+  if (!contentType) {
+    return false
+  }
+
+  return contentType.indexOf('javascript') !== -1
 }
 
 export function unregister() {
