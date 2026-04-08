@@ -1,7 +1,5 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
-  return /^1[34578][0-9]{9}$/.test(phone);
+  return /^1[34578][0-9]{9}$/.test(String(phone || ''));
 }
 
 function checkEmail (email) {
@@ -10,11 +8,11 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  return value === null || value === undefined || trimStr(String(value)) === '';
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -40,6 +38,9 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  if (typeof window === 'undefined') {
+    return;
+  }
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
@@ -53,12 +54,8 @@ const PhoneCall = function (phoneNumber) {
 
   let url;
 
-  if (Platform.OS !== 'android') {
-    url = prompt ? 'telprompt:' : 'tel:';
-  }
-  else {
-    url = 'tel:';
-  }
+  const isAndroid = /android/i.test(window.navigator.userAgent || '');
+  url = isAndroid ? 'tel:' : (prompt ? 'telprompt:' : 'tel:');
 
   url += phoneNumber;
 
@@ -66,22 +63,7 @@ const PhoneCall = function (phoneNumber) {
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
-    }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  window.location.href = url;
 };
 
 const isCorrectType = function (expected, actual) {
