@@ -5,16 +5,36 @@ class Select_ extends Component {
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getFirstValue(props.options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options === this.props.options) {
+      return;
+    }
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
+    if (options.length === 0) {
+      if (this.state.selectValue !== '') {
+        this.setState({selectValue: ''});
+      }
+      return;
+    }
+    const hasCurrent = options.some((item) => item && item.value === this.state.selectValue);
+    if (!hasCurrent) {
+      this.setState({selectValue: getFirstValue(options)});
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    let options = Array.isArray(this.props.options) ? this.props.options : [];
     return (
       <div
         onClick={() => {
+          if (options.length === 0) {
+            return;
+          }
           this.setState({show: !this.state.show})
         }}
         style={{
@@ -26,6 +46,9 @@ class Select_ extends Component {
         <p style={styles.p1}>{this.state.selectValue}</p>
         {
           options.map((ele, index) => {
+            if (!ele) {
+              return null;
+            }
             return <p style={styles.p1} key={index}
                       onClick={(e) => {
                         e.preventDefault();
@@ -50,4 +73,16 @@ const styles = {
     textAlign: 'center'
   }
 };
+
+function getFirstValue (options) {
+  if (!Array.isArray(options) || options.length === 0 || !options[0]) {
+    return '';
+  }
+  return options[0].value;
+}
+
+Select_.defaultProps = {
+  options: []
+};
+
 export default Select_
