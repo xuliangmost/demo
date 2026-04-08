@@ -65,11 +65,11 @@ class Index extends Component {
           </label>
         </div>
 
-        <Link to='steps'>跳转到页面</Link>
+        <Link to='/steps'>跳转到页面</Link>
 
         <Select
           onChange={(value) => {
-            console.log(value)
+            this.clickValue(value)
           }}
           options={
             [

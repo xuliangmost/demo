@@ -1,5 +1,3 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
 }
@@ -14,7 +12,10 @@ function isEmpty (value) {
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -39,8 +40,7 @@ function getNowFormatDate () {
     + seperator2 + date.getSeconds();
 }
 
-const PhoneCall = function (phoneNumber) {
-  let prompt = true;
+const PhoneCall = function (phoneNumber, prompt = true) {
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
     return;
@@ -51,37 +51,25 @@ const PhoneCall = function (phoneNumber) {
     return;
   }
 
-  let url;
+  // telprompt is React Native specific, web 端统一使用 tel.
+  const url = `tel:${phoneNumber}`;
 
-  if (Platform.OS !== 'android') {
-    url = prompt ? 'telprompt:' : 'tel:';
-  }
-  else {
-    url = 'tel:';
-  }
-
-  url += phoneNumber;
-
-  LaunchURL(url);
+  LaunchURL(url, prompt);
 };
 
-const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
+const LaunchURL = function (url, prompt) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+  try {
+    if (prompt) {
+      window.open(url, '_self');
     } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
+      window.location.href = url;
     }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  } catch (err) {
+    console.warn('openURL error', err)
+  }
 };
 
 const isCorrectType = function (expected, actual) {
