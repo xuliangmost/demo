@@ -1,4 +1,12 @@
-import {Linking, Platform} from 'react-native'
+function getReactNativeModules () {
+  try {
+    // react-native is optional in this web project, lazy require avoids build-time module resolution errors.
+    // eslint-disable-next-line global-require
+    return require('react-native');
+  } catch (e) {
+    return null;
+  }
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -10,7 +18,7 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  return value === null || value === undefined || trimStr(String(value)) === '';
 }
 
 function trimStr (str) {
@@ -40,6 +48,14 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  const rnModules = getReactNativeModules();
+  if (!rnModules) {
+    console.warn('PhoneCall is unavailable: react-native module is not installed in current runtime.');
+    return;
+  }
+  const Linking = rnModules.Linking;
+  const Platform = rnModules.Platform;
+
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
@@ -62,15 +78,15 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  LaunchURL(Linking, url);
 };
 
-const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
+const LaunchURL = function (linking, url) {
+  linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
     } else {
-      Linking.openURL(url)
+      linking.openURL(url)
         .catch(err => {
           if (url.includes('telprompt')) {
             // telprompt was cancelled and Linking openURL method sees this as an error
