@@ -1,21 +1,48 @@
 import React, {Component} from 'react'
 
+function normalizeOptions (options) {
+  if (!Array.isArray(options)) {
+    return []
+  }
+  return options.filter((item) => item && item.value !== undefined && item.value !== null)
+}
+
+function getDefaultValue (options) {
+  return options.length > 0 ? options[0].value : ''
+}
+
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = normalizeOptions(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: getDefaultValue(options)
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = normalizeOptions(this.props.options);
+      const nextValue = getDefaultValue(options);
+      if (!options.some((item) => item.value === this.state.selectValue)) {
+        this.setState({
+          selectValue: nextValue,
+          show: false
+        });
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = normalizeOptions(this.props.options);
     return (
       <div
         onClick={() => {
-          this.setState({show: !this.state.show})
+          if (options.length > 0) {
+            this.setState({show: !this.state.show})
+          }
         }}
         style={{
           width: 100,
@@ -23,7 +50,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{this.state.selectValue || '--'}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
@@ -50,4 +77,9 @@ const styles = {
     textAlign: 'center'
   }
 };
+
+export {
+  normalizeOptions,
+  getDefaultValue
+}
 export default Select_
