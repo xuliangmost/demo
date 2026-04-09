@@ -1,5 +1,3 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
 }
@@ -14,7 +12,10 @@ function isEmpty (value) {
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -40,7 +41,7 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
-  let prompt = true;
+  const prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
     return;
@@ -53,7 +54,7 @@ const PhoneCall = function (phoneNumber) {
 
   let url;
 
-  if (Platform.OS !== 'android') {
+  if (!isAndroid()) {
     url = prompt ? 'telprompt:' : 'tel:';
   }
   else {
@@ -66,11 +67,11 @@ const PhoneCall = function (phoneNumber) {
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
+  canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
     } else {
-      Linking.openURL(url)
+      openURL(url)
         .catch(err => {
           if (url.includes('telprompt')) {
             // telprompt was cancelled and Linking openURL method sees this as an error
@@ -82,6 +83,28 @@ const LaunchURL = function (url) {
         });
     }
   }).catch(err => console.warn('An unexpected error happened', err));
+};
+
+const isAndroid = function () {
+  if (typeof navigator === 'undefined') {
+    return false;
+  }
+  return /Android/i.test(navigator.userAgent || '');
+};
+
+const canOpenURL = function (url) {
+  if (typeof window === 'undefined') {
+    return Promise.resolve(false);
+  }
+  return Promise.resolve(typeof url === 'string' && url.length > 0);
+};
+
+const openURL = function (url) {
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('window is unavailable'));
+  }
+  window.location.href = url;
+  return Promise.resolve();
 };
 
 const isCorrectType = function (expected, actual) {
