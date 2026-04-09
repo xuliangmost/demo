@@ -1,4 +1,7 @@
-import {Linking, Platform} from 'react-native'
+const canUseWindow = typeof window !== 'undefined';
+const isAndroid = canUseWindow
+  ? /android/i.test(window.navigator && window.navigator.userAgent)
+  : false;
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -10,11 +13,14 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  return trimStr(String(value)) === '';
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -53,7 +59,7 @@ const PhoneCall = function (phoneNumber) {
 
   let url;
 
-  if (Platform.OS !== 'android') {
+  if (!isAndroid) {
     url = prompt ? 'telprompt:' : 'tel:';
   }
   else {
@@ -66,22 +72,16 @@ const PhoneCall = function (phoneNumber) {
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
-    }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  if (!canUseWindow || !window.location) {
+    console.warn('Cannot open URL outside browser environment:', url);
+    return;
+  }
+
+  try {
+    window.location.href = url;
+  } catch (err) {
+    console.warn('openURL error', err);
+  }
 };
 
 const isCorrectType = function (expected, actual) {
