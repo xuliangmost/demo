@@ -1,5 +1,3 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
 }
@@ -10,11 +8,17 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  return trimStr(value) === '';
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -28,15 +32,27 @@ function getNowFormatDate () {
   let seperator2 = ":";
   let month = date.getMonth() + 1;
   let strDate = date.getDate();
+  let hour = date.getHours();
+  let minute = date.getMinutes();
+  let second = date.getSeconds();
   if (month >= 1 && month <= 9) {
     month = "0" + month;
   }
-  if (strDate >= 0 && strDate <= 9) {
+  if (strDate >= 1 && strDate <= 9) {
     strDate = "0" + strDate;
   }
+  if (hour >= 0 && hour <= 9) {
+    hour = "0" + hour;
+  }
+  if (minute >= 0 && minute <= 9) {
+    minute = "0" + minute;
+  }
+  if (second >= 0 && second <= 9) {
+    second = "0" + second;
+  }
   return date.getFullYear() + seperator1 + month + seperator1 + strDate
-    + " " + date.getHours() + seperator2 + date.getMinutes()
-    + seperator2 + date.getSeconds();
+    + " " + hour + seperator2 + minute
+    + seperator2 + second;
 }
 
 const PhoneCall = function (phoneNumber) {
@@ -51,37 +67,18 @@ const PhoneCall = function (phoneNumber) {
     return;
   }
 
-  let url;
-
-  if (Platform.OS !== 'android') {
-    url = prompt ? 'telprompt:' : 'tel:';
-  }
-  else {
-    url = 'tel:';
-  }
-
-  url += phoneNumber;
+  const telScheme = prompt ? 'telprompt:' : 'tel:';
+  const url = `${telScheme}${phoneNumber}`;
 
   LaunchURL(url);
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
-    }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  if (typeof window === 'undefined') {
+    console.warn('LaunchURL is only available in browser environment');
+    return;
+  }
+  window.location.href = url;
 };
 
 const isCorrectType = function (expected, actual) {
