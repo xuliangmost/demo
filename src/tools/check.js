@@ -1,4 +1,12 @@
-import {Linking, Platform} from 'react-native'
+let Linking = null;
+let Platform = {OS: 'web'};
+try {
+  const ReactNative = require('react-native');
+  Linking = ReactNative.Linking;
+  Platform = ReactNative.Platform || Platform;
+} catch (error) {
+  // keep web fallback when react-native is unavailable
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -10,11 +18,20 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value !== 'string') {
+    return false;
+  }
+  return trimStr(value) === '';
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -53,7 +70,7 @@ const PhoneCall = function (phoneNumber) {
 
   let url;
 
-  if (Platform.OS !== 'android') {
+  if (Platform && Platform.OS !== 'android') {
     url = prompt ? 'telprompt:' : 'tel:';
   }
   else {
@@ -62,10 +79,24 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  if (Linking && typeof Linking.canOpenURL === 'function') {
+    LaunchURL(url);
+    return;
+  }
+
+  if (typeof window !== 'undefined' && typeof window.open === 'function') {
+    window.open(url);
+    return;
+  }
+
+  console.warn('PhoneCall is not supported in this environment');
 };
 
 const LaunchURL = function (url) {
+  if (!Linking || typeof Linking.canOpenURL !== 'function') {
+    console.warn('Linking API is unavailable');
+    return;
+  }
   Linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
