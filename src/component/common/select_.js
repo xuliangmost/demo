@@ -3,18 +3,32 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const initialOptions = Array.isArray(props.options) ? props.options : [];
+    const initialValue = initialOptions.length > 0 ? initialOptions[0].value : '';
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: initialValue
+    }
+  }
+
+  componentDidUpdate (prevProps) {
+    const prevOptions = Array.isArray(prevProps.options) ? prevProps.options : [];
+    const nextOptions = Array.isArray(this.props.options) ? this.props.options : [];
+    if (prevOptions !== nextOptions) {
+      const nextValue = nextOptions.length > 0 ? nextOptions[0].value : '';
+      if (!nextOptions.find(item => item.value === this.state.selectValue)) {
+        this.setState({selectValue: nextValue});
+      }
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = Array.isArray(this.props.options) ? this.props.options : [];
     return (
       <div
         onClick={() => {
+          if (options.length === 0) return;
           this.setState({show: !this.state.show})
         }}
         style={{
@@ -23,7 +37,7 @@ class Select_ extends Component {
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
-        <p style={styles.p1}>{this.state.selectValue}</p>
+        <p style={styles.p1}>{this.state.selectValue || '暂无数据'}</p>
         {
           options.map((ele, index) => {
             return <p style={styles.p1} key={index}
