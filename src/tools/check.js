@@ -1,4 +1,5 @@
-import {Linking, Platform} from 'react-native'
+let Linking = null;
+const Platform = {OS: 'web'};
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -14,7 +15,7 @@ function isEmpty (value) {
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -40,6 +41,23 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  if (!Linking && typeof window !== 'undefined') {
+    Linking = {
+      canOpenURL () {
+        return Promise.resolve(true);
+      },
+      openURL (url) {
+        window.location.href = url;
+        return Promise.resolve();
+      }
+    };
+  }
+
+  if (!Linking) {
+    console.log('PhoneCall is not supported in current environment');
+    return;
+  }
+
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
