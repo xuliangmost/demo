@@ -3,15 +3,38 @@ import React, {Component} from 'react'
 class Select_ extends Component {
   constructor (props) {
     super(props);
+    const options = this.getSafeOptions(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: options.length > 0 ? options[0].value : ''
     }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const options = this.getSafeOptions(this.props.options);
+      if (
+        options.length > 0 &&
+        !options.some(item => item.value === this.state.selectValue)
+      ) {
+        this.setState({selectValue: options[0].value});
+      }
+      if (options.length === 0 && this.state.selectValue !== '') {
+        this.setState({selectValue: ''});
+      }
+    }
+  }
+
+  getSafeOptions (options) {
+    if (!Array.isArray(options)) {
+      return [];
+    }
+    return options.filter(item => item && Object.prototype.hasOwnProperty.call(item, 'value'));
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    const options = this.getSafeOptions(this.props.options);
     return (
       <div
         onClick={() => {
@@ -19,7 +42,8 @@ class Select_ extends Component {
         }}
         style={{
           width: 100,
-          height: this.state.show ? height_ * options.length + 50 : height_, overflow: 'hidden',
+          height: this.state.show ? height_ * options.length + 50 : height_,
+          overflow: 'hidden',
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
