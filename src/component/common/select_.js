@@ -2,19 +2,25 @@ import React, {Component} from 'react'
 
 class Select_ extends Component {
   constructor (props) {
+    const firstValue = Array.isArray(props.options) && props.options.length > 0
+      ? props.options[0].value
+      : '';
     super(props);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: firstValue
     }
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    let {options = []} = this.props;
     return (
       <div
         onClick={() => {
+          if (options.length === 0) {
+            return;
+          }
           this.setState({show: !this.state.show})
         }}
         style={{

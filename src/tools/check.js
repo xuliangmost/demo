@@ -1,4 +1,19 @@
-import {Linking, Platform} from 'react-native'
+function getRuntimePhoneDeps () {
+  // Keep this util usable in web-only bundles by avoiding hard react-native import.
+  if (typeof window !== 'undefined') {
+    return {
+      Platform: {OS: 'web'},
+      Linking: {
+        canOpenURL: (url) => Promise.resolve(typeof url === 'string' && url.length > 0),
+        openURL: (url) => {
+          window.location.href = url;
+          return Promise.resolve();
+        }
+      }
+    };
+  }
+  return null;
+}
 
 function checkPhone (phone) {
   return /^1[34578][0-9]{9}$/.test(phone);
@@ -10,7 +25,13 @@ function checkEmail (email) {
 }
 
 function isEmpty (value) {
-  return value === null || value === undefined || trimStr(value) === '';
+  if (value === null || value === undefined) {
+    return true;
+  }
+  if (typeof value === 'string') {
+    return trimStr(value) === '';
+  }
+  return false;
 }
 
 function trimStr (str) {
@@ -40,6 +61,12 @@ function getNowFormatDate () {
 }
 
 const PhoneCall = function (phoneNumber) {
+  const runtimeDeps = getRuntimePhoneDeps();
+  if (!runtimeDeps) {
+    console.warn('PhoneCall is only available in browser or react-native runtime');
+    return;
+  }
+  const {Linking, Platform} = runtimeDeps;
   let prompt = true;
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
@@ -62,10 +89,10 @@ const PhoneCall = function (phoneNumber) {
 
   url += phoneNumber;
 
-  LaunchURL(url);
+  LaunchURL(Linking, url);
 };
 
-const LaunchURL = function (url) {
+const LaunchURL = function (Linking, url) {
   Linking.canOpenURL(url).then(supported => {
     if (!supported) {
       console.log('Can\'t handle url: ' + url);
