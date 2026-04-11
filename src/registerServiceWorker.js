@@ -77,9 +77,13 @@ function checkValidServiceWorker(swUrl) {
   fetch(swUrl)
     .then(response => {
       // Ensure service worker exists, and that we really are getting a JS file.
+      const contentType = response.headers.get('content-type');
+      const isJavascript =
+        typeof contentType === 'string' &&
+        contentType.indexOf('javascript') !== -1;
       if (
         response.status === 404 ||
-        response.headers.get('content-type').indexOf('javascript') === -1
+        !isJavascript
       ) {
         // No service worker found. Probably a different app. Reload the page.
         navigator.serviceWorker.ready.then(registration => {
