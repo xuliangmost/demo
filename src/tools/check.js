@@ -1,12 +1,10 @@
-import {Linking, Platform} from 'react-native'
-
 function checkPhone (phone) {
-  return /^1[34578][0-9]{9}$/.test(phone);
+  return /^1[34578][0-9]{9}$/.test(String(phone));
 }
 
 function checkEmail (email) {
   let reg = /^(\w)+(\.\w+)*@(\w)+((\.\w+)+)$/;
-  return reg.test(email)
+  return reg.test(String(email))
 }
 
 function isEmpty (value) {
@@ -14,7 +12,10 @@ function isEmpty (value) {
 }
 
 function trimStr (str) {
-  return str.replace(/(^\s*)|(\s*$)/g, '');
+  if (str === null || str === undefined) {
+    return '';
+  }
+  return String(str).replace(/(^\s*)|(\s*$)/g, '');
 }
 
 function cardValidate (card) {
@@ -28,19 +29,30 @@ function getNowFormatDate () {
   let seperator2 = ":";
   let month = date.getMonth() + 1;
   let strDate = date.getDate();
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let seconds = date.getSeconds();
   if (month >= 1 && month <= 9) {
     month = "0" + month;
   }
   if (strDate >= 0 && strDate <= 9) {
     strDate = "0" + strDate;
   }
+  if (hours >= 0 && hours <= 9) {
+    hours = "0" + hours;
+  }
+  if (minutes >= 0 && minutes <= 9) {
+    minutes = "0" + minutes;
+  }
+  if (seconds >= 0 && seconds <= 9) {
+    seconds = "0" + seconds;
+  }
   return date.getFullYear() + seperator1 + month + seperator1 + strDate
-    + " " + date.getHours() + seperator2 + date.getMinutes()
-    + seperator2 + date.getSeconds();
+    + " " + hours + seperator2 + minutes
+    + seperator2 + seconds;
 }
 
-const PhoneCall = function (phoneNumber) {
-  let prompt = true;
+const PhoneCall = function (phoneNumber, prompt = true) {
   if (!isCorrectType('String', phoneNumber)) {
     console.log('the phone number must be provided as a String value');
     return;
@@ -51,14 +63,9 @@ const PhoneCall = function (phoneNumber) {
     return;
   }
 
-  let url;
-
-  if (Platform.OS !== 'android') {
-    url = prompt ? 'telprompt:' : 'tel:';
-  }
-  else {
-    url = 'tel:';
-  }
+  const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const isIOS = /iPad|iPhone|iPod/i.test(ua);
+  let url = isIOS && prompt ? 'telprompt:' : 'tel:';
 
   url += phoneNumber;
 
@@ -66,22 +73,11 @@ const PhoneCall = function (phoneNumber) {
 };
 
 const LaunchURL = function (url) {
-  Linking.canOpenURL(url).then(supported => {
-    if (!supported) {
-      console.log('Can\'t handle url: ' + url);
-    } else {
-      Linking.openURL(url)
-        .catch(err => {
-          if (url.includes('telprompt')) {
-            // telprompt was cancelled and Linking openURL method sees this as an error
-            // it is not a true error so ignore it to prevent apps crashing
-            // see https://github.com/anarchicknight/react-native-communications/issues/39
-          } else {
-            console.warn('openURL error', err)
-          }
-        });
-    }
-  }).catch(err => console.warn('An unexpected error happened', err));
+  if (typeof window === 'undefined' || !window.location) {
+    console.warn('Current runtime does not support url navigation:', url);
+    return;
+  }
+  window.location.href = url;
 };
 
 const isCorrectType = function (expected, actual) {
