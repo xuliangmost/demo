@@ -1,17 +1,48 @@
 import React, {Component} from 'react'
 
 class Select_ extends Component {
+  static defaultProps = {
+    options: []
+  };
+
   constructor (props) {
     super(props);
+    const firstValue = this.getFirstValue(props.options);
     this.state = {
       show: false,
-      selectValue: props.options[0].value
+      selectValue: firstValue
     }
+  }
+
+  componentDidUpdate (prevProps) {
+    if (prevProps.options !== this.props.options) {
+      const nextValue = this.getFirstValue(this.props.options);
+
+      if (!this.hasOptionValue(this.props.options, this.state.selectValue) && nextValue !== this.state.selectValue) {
+        this.setState({selectValue: nextValue});
+      }
+    }
+  }
+
+  getFirstValue (options) {
+    if (!Array.isArray(options) || options.length === 0) {
+      return '';
+    }
+
+    return options[0] && options[0].value ? options[0].value : '';
+  }
+
+  hasOptionValue (options, value) {
+    if (!Array.isArray(options) || options.length === 0) {
+      return false;
+    }
+
+    return options.some((item) => item && item.value === value);
   }
 
   render () {
     const height_ = 50;
-    let {options} = this.props;
+    let options = Array.isArray(this.props.options) ? this.props.options : [];
     return (
       <div
         onClick={() => {
@@ -19,7 +50,8 @@ class Select_ extends Component {
         }}
         style={{
           width: 100,
-          height: this.state.show ? height_ * options.length + 50 : height_, overflow: 'hidden',
+          height: this.state.show ? height_ * options.length + 50 : height_,
+          overflow: 'hidden',
           background: '#85E2FF',
           transition: 'all 0.4s ease',
         }}>
